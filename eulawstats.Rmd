@@ -1,0 +1,28 @@
+---
+title: "eulawstats"
+output: html_document
+author: Michal Ovádek
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r, include=FALSE, warning=FALSE, error=FALSE}
+library(eurlex)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+acts <- elx_make_query("any", sector = 3) |> elx_run_query()
+
+regs <- acts |> filter(str_sub(celex,6,6) == "R")
+decs <- acts |> filter(str_sub(celex,6,6) == "D")
+dirs <- acts |> filter(str_sub(celex,6,6) == "L")
+```
+
+## The Legislative Output of the European Union
+
+Up to and including `r format(Sys.time(), '%d %B, %Y')`, the European U and its predecessors have produced `r nrow(regs)` number of regulations, `r nrow(dirs)` number of directives and `r nrow(decs)` number of decisions.
+
