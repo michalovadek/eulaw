@@ -3,7 +3,6 @@
 
 on:
   push:
-    - paths: ['**.Rmd']
   schedule:
     - cron:  '59 23 * * *'
 
