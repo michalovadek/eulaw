@@ -58,4 +58,5 @@ jobs:
       - name: Move render page
         run: |
           git mv eulawstats.html html
+          git commit -m "Moved to html"
           
