@@ -6,7 +6,6 @@ author: Michal Ovádek
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-system("sudo apt-get install libcurl4-openssl-dev")
 ```
 
 

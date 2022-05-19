@@ -11,6 +11,7 @@ jobs:
   render-rmarkdown:
     runs-on: ubuntu-latest
     env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Install curl
@@ -23,6 +24,10 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - uses: r-lib/actions/setup-r@v1
+      
+      - name: Install libcurl through R
+        run: |
+          source("libcurl-install.R")
 
       - uses: r-lib/actions/setup-renv@v1
       
