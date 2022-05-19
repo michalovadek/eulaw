@@ -50,7 +50,7 @@ jobs:
           git commit ${RMD_PATH[*]/.Rmd/.md} -m 'Re-build Rmarkdown files' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
           
-      - Add and commit    
+      - name: Add and commit    
       - uses: EndBug/add-and-commit@v9
         with: 
           add: 'eulawstats.html'
