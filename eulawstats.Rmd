@@ -1,5 +1,5 @@
 ---
-title: "Legislative Output of the European Union, Live!"
+title: "Legislative Output of the European Union"
 author: Michal Ovádek
 output: 
   html_document:
@@ -56,8 +56,8 @@ ggplot(n_relevant, aes(x = year, y = n, fill = type, color = type)) +
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
-        plot.background = element_rect(fill = "grey30"),
-        panel.grid = element_line(color = "grey28"),
+        plot.background = element_rect(fill = "white"),
+        panel.grid = element_line(color = "grey95"),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
         strip.text = element_text(hjust = 0, face = "bold")) +
@@ -90,7 +90,7 @@ expand.grid(year = min(n_relevant$year):max(n_relevant$year),
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
-        plot.background = element_rect(fill = "grey30"),
+        #plot.background = element_rect(fill = "white"),
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
