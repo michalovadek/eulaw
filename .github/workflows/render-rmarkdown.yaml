@@ -28,6 +28,7 @@ jobs:
       - name: Install libcurl through R
         run: |
           source("libcurl-install.R")
+        shell: Rscript {0}
 
       - uses: r-lib/actions/setup-renv@v1
       
