@@ -29,5 +29,5 @@ Up to and including `r format(Sys.time(), '%d %B, %Y')`, the European U and its 
 
 And so on ... and on .. new ... poppler v3 ... renv update html, github permissions 
 
-html git commit
+html git commit 
 
