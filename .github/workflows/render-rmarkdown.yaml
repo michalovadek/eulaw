@@ -3,9 +3,9 @@
 
 on:
   push:
+    - paths: ['**.Rmd']
   schedule:
     - cron:  '59 23 * * *'
-    - paths: ['**.Rmd']
 
 name: render-rmarkdown
 
