@@ -14,6 +14,7 @@ library(eurlex)
 library(ggplot2)
 library(dplyr)
 library(stringr)
+library(rmarkdown)
 
 acts <- elx_make_query("any", sector = 3) |> elx_run_query()
 
