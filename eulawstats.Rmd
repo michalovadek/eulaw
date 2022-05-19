@@ -26,3 +26,5 @@ dirs <- acts |> filter(str_sub(celex,6,6) == "L")
 ## The Legislative Output of the European Union
 
 Up to and including `r format(Sys.time(), '%d %B, %Y')`, the European U and its predecessors have produced `r nrow(regs)` number of regulations, `r nrow(dirs)` number of directives and `r nrow(decs)` number of decisions.
+
+Maybe now?
