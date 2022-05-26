@@ -200,10 +200,10 @@
     },
     "eurlex": {
       "Package": "eurlex",
-      "Version": "0.4.1",
+      "Version": "0.4.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "0b7e9f9733a9ea502b30a8211e47d88a",
+      "Hash": "3cf0d60f749f1b3da028a6725b02147d",
       "Requirements": [
         "antiword",
         "curl",
