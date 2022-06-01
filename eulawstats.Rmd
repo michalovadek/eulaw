@@ -126,6 +126,7 @@ expand.grid(year = min(n_relevant$year):max(n_relevant$year),
   ungroup() |> 
   ggplot(aes(x = year, y = proportion, fill = type, color = type)) +
   geom_area(show.legend = TRUE) +
+  geom_vline(xintercept = c(1960,1980,2000,2020), lty = 2, color = "grey70") +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
   theme_minimal() +
@@ -213,26 +214,50 @@ acts_days <- acts_proposals |>
   filter(days == max(days)) |> 
   ungroup() |> 
   distinct(celex, .keep_all = TRUE) |> 
+  arrange(date) |> 
   mutate(year_adopted = as.integer(str_sub(date, 1, 4)),
          type = str_sub(celex, 6, 6),
          type = case_when(type == "R" ~ "Regulation",
                           type == "L" ~ "Directive",
                           type == "D" ~ "Decision",
                           T ~ "Other"),
-         five_year = cut_interval(year_adopted, length = 5))
+         five_year = cut_interval(year_adopted, length = 5)) |> 
+  filter(year_adopted > 1984) # not many complete pairs before this
+
+acts_days |> 
+  ggplot(aes(x = as.character(year_adopted), y = days, color = type, fill = type)) +
+  geom_violin(trim = TRUE, alpha = 0.2) +
+  facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
+  scale_fill_brewer(palette = "Spectral") +
+  scale_color_brewer(palette = "Spectral") +
+  theme_minimal() +
+  theme(legend.position = "top",
+        legend.justification = "left",
+        legend.title = element_text(face = "italic"),
+        plot.background = element_rect(fill = "white"),
+        panel.grid = element_blank(),
+        axis.text = element_text(color = "grey10"),
+        title = element_text(face = "bold"),
+        strip.text = element_text(hjust = 0, face = "bold")) +
+  labs(x = "Year", y = "Days to adoption",
+       title = "Number of days between first proposal and adoption")
+
+# calculate yearly average
+year_avg <- acts_days |> 
+  group_by(year_adopted, five_year, type) |> 
+  summarise(mean_year = mean(days),
+            sd_year = sd(days)) |> 
+  ungroup()
 
 # calculate five year averages
-five_year_avg <- acts_days |> 
+five_year_avg <- year_avg |> 
   group_by(five_year, type) |> 
-  summarise(mean_five = mean(days),
-            sd_five = sd(days))
+  summarise(mean_five = mean(mean_year),
+            sd_five = sd(mean_year)) |> 
+  ungroup()
 
-# viz
-acts_days |> 
-  group_by(year_adopted, five_year, type) |> 
-  summarise(mean_year = mean(days)) |> 
+year_avg |> 
   left_join(five_year_avg) |> 
-  filter(year_adopted > 1980) |> 
   ggplot(aes(x = year_adopted, y = mean_year, fill = type, color = type)) +
   geom_col() +
   geom_step(aes(x = year_adopted, y = sd_five), lty = 2, color = "black") +
