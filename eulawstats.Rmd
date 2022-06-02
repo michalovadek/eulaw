@@ -268,7 +268,7 @@ acts_days |>
 
 ### Code
 
-```{r efficiencyviz, echo=TRUE, eval=FALSE}
+```{r efficiencyvizcode, echo=TRUE, eval=FALSE}
 
 # calculate maximum length of adoption and discard negative
 acts_days <- acts_proposals |> 
