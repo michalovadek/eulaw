@@ -4,6 +4,8 @@ subtitle: "An Automatically Updated Overview of the EU's Legislative Activity"
 author: Dr Michal Ovádek
 output: 
   html_document:
+    df_print: paged
+    code_folding: hide
     toc: true
     toc_float: true
     theme: cosmo
@@ -278,9 +280,9 @@ Directives take by far the longest to adopt; unlike decisions and regulations, t
 
 To investigate this claim further, let's move from visual inspection to regression analysis.
 
-## {-} {.tabset}
+### Regression {.tabset}
 
-### Plot
+#### Table
 
 ```{r regression}
 
@@ -382,11 +384,15 @@ modelsummary(models,
 
 ```
 
-### Code
+#### Code
 
 ```{r regression, echo=TRUE, eval=FALSE}
 ```
 
-## {-}
+### {-}
 
-Controlling for the type of act, the simple linear model predicts that for every additional Member State, the EU takes ```r effect``` days longer to adopt the legal act. This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality. Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are associated with slower law-making. 
+Controlling for the type of act, the linear model predicts that for every additional Member State, the EU takes ```r effect``` days longer to adopt the legal act.
+
+This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality.
+
+Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are not associated with slower law-making. 
