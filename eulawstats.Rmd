@@ -278,6 +278,8 @@ Directives take by far the longest to adopt; unlike decisions and regulations, t
 
 To investigate this claim further, let's move from visual inspection to regression analysis.
 
+## {-} {.tabset}
+
 ### Plot
 
 ```{r regression}
