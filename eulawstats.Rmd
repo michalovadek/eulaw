@@ -81,6 +81,8 @@ As of ```r format(Sys.time(), '%d %B %Y')```, the EU and its predecessors have p
 
 We start by looking at how the number of the four main legal acts changed over the lifespan of the EU.
 
+### Plot
+
 ```{r ncounttime}
 
 # select only main act types
@@ -124,7 +126,7 @@ Asd
 
 ### Dataframe
 ```{r ncounttimedf}
-print(n_relevant)
+n_relevant
 ```
 
 ## {-}
@@ -182,7 +184,7 @@ Etc..
 
 #### Dataframe
 ```{r proptimedf}
-print(proptime_df)
+proptime_df
 ```
 
 ### {-}
@@ -246,7 +248,7 @@ last_two_yoy_diff |>
 
 ### Dataframe
 ```{r yoydf}
-print(last_two_yoy_diff)
+last_two_yoy_diff
 ```
 
 ## {-}
@@ -291,7 +293,7 @@ outliers <- acts_days |>
   mutate(max = max(days),
          mean = mean(days),
          coef = days / mean) |> 
-  filter(coef > 3)
+  filter(coef > 2.5)
 
 # plot
 acts_days |> 
@@ -300,7 +302,6 @@ acts_days |>
   mutate(global_mean = mean(days)) |> 
   ggplot(aes(x = five_year, y = days, color = type, fill = type)) +
   geom_boxplot(alpha = 0.1) +
-  #geom_violin(trim = TRUE, alpha = 0.1, draw_quantiles = c(0.5)) +
   geom_hline(aes(yintercept = global_mean), lty = 2, color = "grey70") +
   facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
   scale_fill_brewer(palette = "Spectral") +
@@ -326,6 +327,14 @@ acts_days |>
 ### Code
 
 ```{r efficiencyviz, echo=TRUE, eval=FALSE}
+```
+
+### Dataframe
+
+```{r efficiencyvizdf}
+
+acts_days
+
 ```
 
 ## {-}
@@ -449,7 +458,7 @@ modelsummary(models,
 
 #### Dataframe
 ```{r regdf}
-print(days_ms)
+days_ms
 ```
 
 ### {-}
