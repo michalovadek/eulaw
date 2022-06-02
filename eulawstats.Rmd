@@ -173,6 +173,7 @@ last_two_yoy_diff <- last_two_years_full |>
   summarise(yoy_diff = diff(n)) |> 
   ungroup()
 
+# viz
 last_two_yoy_diff |> 
   ggplot(aes(x = month, y = yoy_diff, fill = type, color = type)) +
   geom_col(show.legend = FALSE) +
@@ -192,13 +193,16 @@ last_two_yoy_diff |>
   labs(x = "Month", y = "Year-on-year difference",
        title = "Monthly year-on-year comparison",
        subtitle = "Difference in the number of acts adopted this year compared to last year")
-  
 
 ```
 
-## Legislative efficiency
+## Legislative efficiency {.tabset}
 
 How long does it take for EU legislation to be adopted?
+
+Hypothesis: enlargement leads to slower adoption processes due to increasing the number of players
+
+### Plot
 
 ```{r efficiencyviz}
 
@@ -222,11 +226,25 @@ acts_days <- acts_proposals |>
                           type == "D" ~ "Decision",
                           T ~ "Other"),
          five_year = cut_interval(year_adopted, length = 5)) |> 
-  filter(year_adopted > 1984) # not many complete pairs before this
+  filter(year_adopted > 1985) # not many complete pairs before this
 
+# identify outliers
+outliers <- acts_days |> 
+  group_by(type) |> 
+  mutate(max = max(days),
+         mean = mean(days),
+         coef = days / mean) |> 
+  filter(coef > 3)
+
+# plot
 acts_days |> 
-  ggplot(aes(x = as.character(year_adopted), y = days, color = type, fill = type)) +
-  geom_violin(trim = TRUE, alpha = 0.2) +
+  filter(!celex %in% outliers$celex) |> 
+  group_by(type) |> 
+  mutate(global_mean = mean(days)) |> 
+  ggplot(aes(x = five_year, y = days, color = type, fill = type)) +
+  geom_boxplot(alpha = 0.1) +
+  #geom_violin(trim = TRUE, alpha = 0.1, draw_quantiles = c(0.5)) +
+  geom_hline(aes(yintercept = global_mean), lty = 2, color = "grey70") +
   facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
@@ -238,30 +256,60 @@ acts_days |>
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
+        plot.caption = element_text(face = "italic", size = 8),
         strip.text = element_text(hjust = 0, face = "bold")) +
-  labs(x = "Year", y = "Days to adoption",
-       title = "Number of days between first proposal and adoption")
+  labs(x = NULL,
+       y = "Days to adoption",
+       title = "Number of days between proposal and adoption",
+       subtitle = "By five-year window in which the act was adopted*",
+       caption = "* Outliers are pruned from the analysis, dashed line shows the global mean")
 
-# calculate yearly average
-year_avg <- acts_days |> 
-  group_by(year_adopted, five_year, type) |> 
-  summarise(mean_year = mean(days),
-            sd_year = sd(days)) |> 
-  ungroup()
+```
 
-# calculate five year averages
-five_year_avg <- year_avg |> 
-  group_by(five_year, type) |> 
-  summarise(mean_five = mean(mean_year),
-            sd_five = sd(mean_year)) |> 
-  ungroup()
+### Code
 
-year_avg |> 
-  left_join(five_year_avg) |> 
-  ggplot(aes(x = year_adopted, y = mean_year, fill = type, color = type)) +
-  geom_col() +
-  geom_step(aes(x = year_adopted, y = sd_five), lty = 2, color = "black") +
-  facet_wrap(~type) +
+```{r efficiencyviz, echo=TRUE, eval=FALSE}
+
+# calculate maximum length of adoption and discard negative
+acts_days <- acts_proposals |> 
+  filter(!is.na(celex),
+         !is.na(date),
+         !is.na(proposal)) |> 
+  left_join(proposals, by = c("proposal"="celex")) |> 
+  mutate(days = as.integer(as.Date(date) - as.Date(date_proposal))) |> 
+  filter(days > -1) |> 
+  group_by(celex) |> 
+  filter(days == max(days)) |> 
+  ungroup() |> 
+  distinct(celex, .keep_all = TRUE) |> 
+  arrange(date) |> 
+  mutate(year_adopted = as.integer(str_sub(date, 1, 4)),
+         type = str_sub(celex, 6, 6),
+         type = case_when(type == "R" ~ "Regulation",
+                          type == "L" ~ "Directive",
+                          type == "D" ~ "Decision",
+                          T ~ "Other"),
+         five_year = cut_interval(year_adopted, length = 5)) |> 
+  filter(year_adopted > 1985) # not many complete pairs before this
+
+# identify outliers
+outliers <- acts_days |> 
+  group_by(type) |> 
+  mutate(max = max(days),
+         mean = mean(days),
+         coef = days / mean) |> 
+  filter(coef > 3)
+
+# plot
+acts_days |> 
+  filter(!celex %in% outliers$celex) |> 
+  group_by(type) |> 
+  mutate(global_mean = mean(days)) |> 
+  ggplot(aes(x = five_year, y = days, color = type, fill = type)) +
+  geom_boxplot(alpha = 0.1) +
+  #geom_violin(trim = TRUE, alpha = 0.1, draw_quantiles = c(0.5)) +
+  geom_hline(aes(yintercept = global_mean), lty = 2, color = "grey70") +
+  facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
   theme_minimal() +
@@ -272,14 +320,22 @@ year_avg |>
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
-        strip.text = element_text(hjust = 0, face = "bold"))
-
+        plot.caption = element_text(face = "italic", size = 8),
+        strip.text = element_text(hjust = 0, face = "bold")) +
+  labs(x = NULL,
+       y = "Days to adoption",
+       title = "Number of days between proposal and adoption",
+       subtitle = "By five-year window in which the act was adopted*",
+       caption = "* Outliers are pruned from the analysis, dashed line shows the global mean")
 
 ```
 
-... something is wrong ... five year average above all bars 
+## {-}
 
-Hypothesis: enlargement leads to slower adoption processes due to increasing the number of players
+Directives take by far the longest to adopt; unlike decisions and regulations, they are rarely deployed to regulate trivial matters. Nonetheless, there are few easily discernible temporal patterns in the plot. Most of all, it is not obvious that legislative efficiency would decrease as the EU expanded its membership.
+
+To investigate this claim further, let's move from visual inspection to regression analysis.
+
 
 ## More
 
