@@ -1,7 +1,7 @@
 ---
 title: "Legislative Output of the European Union"
 subtitle: "An Automatically Updated Overview of the EU's Legislative Activity"
-author: Michal Ovádek
+author: Dr Michal Ovádek
 output: 
   html_document:
     toc: true
@@ -37,6 +37,7 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(rmarkdown)
+library(modelsummary)
 
 # acts
 acts_proposals <- elx_make_query("any", sector = 3,
@@ -110,7 +111,7 @@ ggplot(n_relevant, aes(x = year, y = n, fill = type, color = type)) +
 
 ```
 
-## Proportion of act types over time
+## Proportion of act types
 
 So we see there is significant over-time variation in the use of the different types of legal acts, but some types of acts, notably regulations, have been historically significantly more common than other types of acts. We can visualize the evolution of proportions directly:
 
@@ -268,66 +269,7 @@ acts_days |>
 
 ### Code
 
-```{r efficiencyvizcode, echo=TRUE, eval=FALSE}
-
-# calculate maximum length of adoption and discard negative
-acts_days <- acts_proposals |> 
-  filter(!is.na(celex),
-         !is.na(date),
-         !is.na(proposal)) |> 
-  left_join(proposals, by = c("proposal"="celex")) |> 
-  mutate(days = as.integer(as.Date(date) - as.Date(date_proposal))) |> 
-  filter(days > -1) |> 
-  group_by(celex) |> 
-  filter(days == max(days)) |> 
-  ungroup() |> 
-  distinct(celex, .keep_all = TRUE) |> 
-  arrange(date) |> 
-  mutate(year_adopted = as.integer(str_sub(date, 1, 4)),
-         type = str_sub(celex, 6, 6),
-         type = case_when(type == "R" ~ "Regulation",
-                          type == "L" ~ "Directive",
-                          type == "D" ~ "Decision",
-                          T ~ "Other"),
-         five_year = cut_interval(year_adopted, length = 5)) |> 
-  filter(year_adopted > 1985) # not many complete pairs before this
-
-# identify outliers
-outliers <- acts_days |> 
-  group_by(type) |> 
-  mutate(max = max(days),
-         mean = mean(days),
-         coef = days / mean) |> 
-  filter(coef > 3)
-
-# plot
-acts_days |> 
-  filter(!celex %in% outliers$celex) |> 
-  group_by(type) |> 
-  mutate(global_mean = mean(days)) |> 
-  ggplot(aes(x = five_year, y = days, color = type, fill = type)) +
-  geom_boxplot(alpha = 0.1) +
-  #geom_violin(trim = TRUE, alpha = 0.1, draw_quantiles = c(0.5)) +
-  geom_hline(aes(yintercept = global_mean), lty = 2, color = "grey70") +
-  facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
-  scale_fill_brewer(palette = "Spectral") +
-  scale_color_brewer(palette = "Spectral") +
-  theme_minimal() +
-  theme(legend.position = "top",
-        legend.justification = "left",
-        legend.title = element_text(face = "italic"),
-        plot.background = element_rect(fill = "white"),
-        panel.grid = element_blank(),
-        axis.text = element_text(color = "grey10"),
-        title = element_text(face = "bold"),
-        plot.caption = element_text(face = "italic", size = 8),
-        strip.text = element_text(hjust = 0, face = "bold")) +
-  labs(x = NULL,
-       y = "Days to adoption",
-       title = "Number of days between proposal and adoption",
-       subtitle = "By five-year window in which the act was adopted*",
-       caption = "* Outliers are pruned from the analysis, dashed line shows the global mean")
-
+```{r efficiencyviz, echo=TRUE, eval=FALSE}
 ```
 
 ## {-}
@@ -336,14 +278,113 @@ Directives take by far the longest to adopt; unlike decisions and regulations, t
 
 To investigate this claim further, let's move from visual inspection to regression analysis.
 
+### Plot
 
-## More
+```{r regression}
 
-A
+# number of member states over time
+ms_years <- bind_rows(
+  data.frame(
+    year = 1952:1972,
+    n_ms = 6
+  ),
+  data.frame(
+    year = 1973:1980,
+    n_ms = 9
+  ),
+  data.frame(
+    year = 1981:1985,
+    n_ms = 10
+  ),
+  data.frame(
+    year = 1986:1994,
+    n_ms = 12
+  ),
+  data.frame(
+    year = 1995:2004,
+    n_ms = 15
+  ),
+  data.frame(
+    year = 2005:2006,
+    n_ms = 25
+  ),
+  data.frame(
+    year = 2007:2013,
+    n_ms = 27
+  ),
+  data.frame(
+    year = 2014:2018,
+    n_ms = 28
+  ),
+  data.frame(
+    year = 2019:2025,
+    n_ms = 27
+  )
+)
 
-Idea: change in the length of adoption (need to match proposals to acts)
-Idea: legal bases use?
+# append N member states
+days_ms <- acts_days |> 
+  left_join(ms_years, by = c("year_adopted"="year")) |> 
+  mutate(type = relevel(as.factor(type), ref = "Other"))
 
-Implement data quality safeguards (weird dates, duplicates, etc.)
+# regress
+models <- list()
 
-Proper custom css file
+## m0
+models[['Baseline']] <- lm(
+  data = days_ms,
+  formula = days ~ n_ms
+)
+names(models[['Baseline']]$coefficients)[1] <- "Constant"
+
+## m1
+models[['Controls']] <- lm(
+  data = days_ms,
+  formula = days ~ n_ms + type
+)
+names(models[['Controls']]$coefficients)[1] <- "Act type = Other"
+
+## m2
+models[['Zero Intercept']] <- lm(
+  data = days_ms,
+  formula = days ~ n_ms + type + 0
+)
+
+# effect size
+effect <- as.numeric(round(models[['Controls']]$coefficients[which(names(models[['Controls']]$coefficients) == "n_ms")],2))
+
+# summary for p values
+mod_sum <- summary(models[['Controls']])
+
+# p value
+p_value <- mod_sum$coefficient[names(mod_sum$coefficient[,1]) == "n_ms",4]
+
+# p threshold
+p_thresh <- 0.05
+
+# can we reject the null
+reject_null <- ifelse(effect > 0 & p_value < p_thresh, "can reject", "cannot reject")
+
+# show table
+modelsummary(models, 
+             stars = TRUE,
+             coef_map = c("n_ms" = "Number of Member States",
+                          "Constant" = "Constant",
+                          "typeOther" = "Act type = Other",
+                          "Act type = Other" = "Act type = Other",
+                          "typeRegulation" = "Act type = Regulation",
+                          "typeDecision" = "Act type = Decision",
+                          "typeDirective" = "Act type = Directive"),
+             title = "Linear regression model of legislative efficiency (Y_i = days)",
+             notes = list("In the 'Controls' specification, 'Other' is the reference category."))
+
+```
+
+### Code
+
+```{r regression, echo=TRUE, eval=FALSE}
+```
+
+## {-}
+
+Controlling for the type of act, the simple linear model predicts that for every additional Member State, the EU takes ```r effect``` days longer to adopt the legal act. This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality. Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are associated with slower law-making.
