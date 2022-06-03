@@ -293,7 +293,7 @@ last_two_yoy_diff
 
 ## {-}
 
-So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r this_month_yoy_dir``` the same month last year. `r if(day_now < 16){But we are still early in the month.}`
+So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r this_month_yoy_dir``` the same month last year. `r if(day_now < 16){"But we are still early in the month."}`
 
 ## Legislative efficiency {.tabset}
 
