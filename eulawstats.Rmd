@@ -425,7 +425,7 @@ iplot_outliers <- outliers_top_txt |>
        y = "Number of days to adoption")
 
 girafe(ggobj = iplot_outliers,
-       fonts = list(sans = "Arial")
+       fonts = list(sans = "Arial"),
        width_svg = 9,
        height_svg = 6,
        options = list(opts_sizing(rescale = FALSE),
@@ -522,7 +522,7 @@ effect <- as.numeric(round(models[['Controls']]$coefficients[which(names(models[
 mod_sum <- summary(models[['Controls']])
 
 # p value
-p_value <- mod_sum$coefficient[names(mod_sum$coefficient[,1]) == "n_ms",4]
+p_value <- mod_sum$coefficient[names(mod_sum$coefficient[,1]) == "n_ms", 4]
 
 # p threshold
 p_thresh <- 0.05
