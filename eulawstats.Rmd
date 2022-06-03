@@ -40,6 +40,9 @@ library(stringr)
 library(rmarkdown)
 library(modelsummary)
 
+# seed
+set.seed(65234)
+
 # acts
 acts_proposals <- elx_make_query("any", sector = 3,
                            include_date = TRUE,
@@ -293,7 +296,7 @@ outliers <- acts_days |>
   mutate(max = max(days),
          mean = mean(days),
          coef = days / mean) |> 
-  filter(coef > 2.5)
+  filter(coef > 2.9)
 
 # plot
 acts_days |> 
@@ -341,7 +344,22 @@ acts_days
 
 Directives take by far the longest to adopt; unlike decisions and regulations, they are rarely deployed to regulate trivial matters. Nonetheless, there are few easily discernible temporal patterns in the plot. Most of all, it is not obvious that legislative efficiency would decrease as the EU expanded its membership.
 
-To investigate this claim further, let's move from visual inspection to regression analysis.
+However, before moving onto further investigation of the efficiency hypothesis, we should pause and take a look at some of the discarded outliers. What legislation took the longest to adopt?
+
+```{r outliers}
+
+# get titles for top outliers
+outliers_top_txt <- outliers |> 
+  arrange(-days) |> 
+  slice(1:50) |> 
+  rowwise() |> 
+  mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
+                                "title")) |> 
+  ungroup()
+
+outliers_top_txt
+
+```
 
 ### Regression {.tabset}
 
@@ -449,6 +467,11 @@ modelsummary(models,
              title = "Linear regression model of legislative efficiency (Y_i = days)",
              notes = list("In the 'Controls' specification, 'Other' is the reference category."))
 
+```
+
+#### Plot
+```{r regviz}
+modelplot(models[['Controls']])
 ```
 
 #### Code
