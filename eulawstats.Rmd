@@ -39,6 +39,7 @@ library(dplyr)
 library(stringr)
 library(rmarkdown)
 library(modelsummary)
+library(ggiraph)
 
 # seed
 set.seed(65234)
@@ -76,13 +77,13 @@ proposals <- elx_make_query("proposal", include_date = TRUE) |>
 date_now <- Sys.Date()
 ```
 
-The European Union (EU) is often criticized for a heavy regulatory touch. What is the reality? This automatically updated research document gives a real-time overview of the EU's legislative output.
+The European Union (EU) is often criticized for having a heavy regulatory touch and being unwieldy. What is the reality? This automatically updated research document gives a real-time overview of the EU's legislative output and efficiency.
 
-As of ```r format(Sys.time(), '%d %B %Y')```, the EU and its predecessors have produced ```r nrow(regs)``` regulations, ```r nrow(dirs)``` directives, ```r nrow(decs)``` decisions and ```r nrow(recs)``` recommendations, according to [Eur-Lex](https://eur-lex.europa.eu/homepage.html) data pulled via the [eurlex](https://github.com/michalovadek/eurlex) package for R and a SPARQL API maintained by the Publications Office of the European Union.
+As of ```r format(Sys.time(), '%d %B %Y')```, the EU and its predecessors have produced ```r nrow(regs)``` regulations, ```r nrow(dirs)``` directives, ```r nrow(decs)``` decisions and ```r nrow(recs)``` recommendations, according to [Eur-Lex](https://eur-lex.europa.eu/homepage.html) data pulled via the [eurlex](https://github.com/michalovadek/eurlex) package for R and a SPARQL API maintained by the Publications Office of the European Union.^[This also means that any omissions and mistakes present in Eur-Lex are carried through to the output shown here.]
 
 ## Number of acts over time {.tabset}
 
-We start by looking at how the number of the four main legal acts changed over the lifespan of the EU.
+We start by looking at how the number of the four main legal acts changed over the lifespan of the EU. The number of acts adopted yearly is a parsimonious – but imperfect^[We should also take into account the regulatory breadth and depth of each legal act. A decision increasing the tariff on steel by 5 per cent is a very different act from, say, the General Data Protection Regulation. ] – proxy for the EU's regulatory tendencies.
 
 ### Plot
 
@@ -118,9 +119,26 @@ ggplot(n_relevant, aes(x = year, y = n, fill = type, color = type)) +
        title = "Number of legal acts produced by the European Union",
        subtitle = "Aggregated at the year level by date of publication")
 
+# vars for text
+year1 <- as.integer(str_sub(date_now,1,4))-1
+year2 <- as.integer(str_sub(date_now,1,4))-2
+
+n_year1 <- n_relevant |> 
+  filter(year == year1) |> 
+  summarise(n = sum(n, na.rm = T)) |> 
+  as.integer()
+
+n_year2 <- n_relevant |> 
+  filter(year == year2) |> 
+  summarise(n = sum(n, na.rm = T)) |> 
+  as.integer()
+
+nyeardif <- ifelse(n_year1 < n_year2, "less than", "more")
+nyeardif <- ifelse(n_year1 == n_year2, "the same as", nyeardif)
+
 ```
 
-Asd
+In ```r year1```, the EU produced ```r n_year1``` legal acts which is ```r nyeardif``` than the ```r n_year2``` acts in ```r year2```. Overall, the EU's legislative output is currently considerably lower compared to, in particular, the 1980s and 1990s.
 
 ### Code
 
@@ -169,16 +187,18 @@ proptime_df |>
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
         strip.text = element_text(hjust = 0, face = "bold")) +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
   labs(x = NULL,
        y = NULL,
-       title = "Proportion of each type of legal act by year")
+       color = NULL,
+       fill = NULL,
+       title = "Relative prevalence of legal acts",
+       subtitle = "Proportion of each type of legal act in a given year",)
 
 ```
-
-Etc..
 
 #### Code
 
@@ -192,7 +212,9 @@ proptime_df
 
 ### {-}
 
-Asd
+We can see that although regulations used to dominate the EU's legislative output, decisions – which are typically associated with various administrative actions – are nowadays almost equally prevalent.
+
+The rise in the number of recommendations can be mostly attributed to the strengthening of the EU's role in the surveillance and coordination of the Member States' economic policies.
 
 ## Year-on-year comparison {.tabset}
 
@@ -237,6 +259,7 @@ last_two_yoy_diff |>
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
         strip.text = element_text(hjust = 0, face = "bold")) +
   labs(x = "Month", y = "Year-on-year difference",
        title = "Monthly year-on-year comparison",
@@ -296,7 +319,8 @@ outliers <- acts_days |>
   mutate(max = max(days),
          mean = mean(days),
          coef = days / mean) |> 
-  filter(coef > 2.9)
+  filter(coef > 2.9) |> 
+  ungroup()
 
 # plot
 acts_days |> 
@@ -304,7 +328,7 @@ acts_days |>
   group_by(type) |> 
   mutate(global_mean = mean(days)) |> 
   ggplot(aes(x = five_year, y = days, color = type, fill = type)) +
-  geom_boxplot(alpha = 0.1) +
+  geom_boxplot(alpha = 0.1, show.legend = FALSE) +
   geom_hline(aes(yintercept = global_mean), lty = 2, color = "grey70") +
   facet_wrap(~type, dir = "h", ncol = 1, scales = "free_y") +
   scale_fill_brewer(palette = "Spectral") +
@@ -317,6 +341,7 @@ acts_days |>
         panel.grid = element_blank(),
         axis.text = element_text(color = "grey10"),
         title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
         plot.caption = element_text(face = "italic", size = 8),
         strip.text = element_text(hjust = 0, face = "bold")) +
   labs(x = NULL,
@@ -351,14 +376,40 @@ However, before moving onto further investigation of the efficiency hypothesis, 
 # get titles for top outliers
 outliers_top_txt <- outliers |> 
   arrange(-days) |> 
-  slice(1:50) |> 
+  slice(1:70) |> 
   rowwise() |> 
   mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
                                 "title")) |> 
   ungroup()
 
-outliers_top_txt
+# interactive plot
+iplot_outliers <- outliers_top_txt |> 
+  bind_rows(data.frame(type = "Recommendation")) |> 
+  ggplot(aes(x = as.Date(date), y = days, color = type, fill = type)) +
+  geom_point_interactive(aes(tooltip = title, data_id = celex), show.legend = FALSE) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Spectral") +
+  scale_color_brewer(palette = "Spectral") +
+  theme_minimal() +
+  theme(legend.position = "top",
+        legend.justification = "left",
+        legend.title = element_text(face = "italic"),
+        plot.background = element_rect(fill = "white"),
+        axis.text = element_text(color = "grey10"),
+        title = element_text(face = "bold"),
+        panel.grid = element_line(color = "grey94"),
+        axis.title = element_text(hjust = 1),
+        plot.subtitle = element_text(face = "italic"),
+        plot.caption = element_text(face = "italic", size = 8),
+        strip.text = element_text(hjust = 0, face = "bold")) +
+  labs(title = "The most slowly adopted acts in EU history",
+       subtitle = "Number of days between first Commission proposal and adoption",
+       caption = "Hover over the points to display the title",
+       x = "Date of adoption",
+       y = "Number of days to adoption")
 
+girafe(ggobj = iplot_outliers)  
+  
 ```
 
 ### Regression {.tabset}
