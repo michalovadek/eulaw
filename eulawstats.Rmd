@@ -27,8 +27,8 @@ knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE,
                       message = FALSE,
                       error = FALSE,
-                      fig.width = 8,
-                      fig.height = 7)
+                      fig.width = 9,
+                      fig.height = 6)
 ```
 
 
@@ -297,9 +297,11 @@ So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r
 
 ## Legislative efficiency {.tabset}
 
-How long does it take for EU legislation to be adopted?
+The image of the EU as an unwieldy bureaucracy with a complicated legislative system appears often in national media. Moreover, most theoretical literature on political systems would expect the number of veto players to affect legislative efficiency. On this basis, we formulate the simple hypothesis that 
 
-Hypothesis: enlargement leads to slower adoption processes due to increasing the number of players
+> The more EU Member States there are, the longer it takes to pass legislation.
+
+Most people are therefore susceptible to assume that the EU needs a lot of time to adopt legal acts. Let's use Eur-Lex data to find out just how long it normally takes to pass legislation.
 
 ### Plot
 
@@ -404,7 +406,7 @@ iplot_outliers <- outliers_top_txt |>
   theme_minimal() +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
-  theme_minimal(base_family = "sans") +
+  theme_minimal(base_family = "Arial") +
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
@@ -422,7 +424,16 @@ iplot_outliers <- outliers_top_txt |>
        x = "Date of adoption",
        y = "Number of days to adoption")
 
-girafe(ggobj = iplot_outliers)  
+girafe(ggobj = iplot_outliers,
+       fonts = list(sans = "Arial")
+       width_svg = 9,
+       height_svg = 6,
+       options = list(opts_sizing(rescale = FALSE),
+                      opts_tooltip(css = "background-color:gray;color:white;font-style:italic;padding:10px;border-radius:5px;",
+                                   use_fill = TRUE),
+                      opts_hover_inv(css = "opacity:0.1;"),
+                      opts_hover(css = "fill:green;"))
+)
   
 ```
 
