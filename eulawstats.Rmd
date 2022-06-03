@@ -299,7 +299,7 @@ So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r
 
 The image of the EU as an unwieldy bureaucracy with a complicated legislative system appears often in national media. Moreover, most theoretical literature on political systems would expect the number of veto players to affect legislative efficiency. On this basis, we formulate the simple hypothesis that 
 
-> The more EU Member States there are, the longer it takes to pass legislation.
+> H1: The more EU Member States there are, the longer it takes to pass legislation.
 
 Most people are therefore susceptible to assume that the EU needs a lot of time to adopt legal acts. Let's use Eur-Lex data to find out just how long it normally takes to pass legislation.
 
@@ -425,7 +425,7 @@ iplot_outliers <- outliers_top_txt |>
        subtitle = "Number of days between first Commission proposal and adoption",
        caption = "Hover over the points to display the title",
        x = "Date of adoption",
-       y = "Number of days to adoption")
+       y = "Days to adoption")
 
 girafe(ggobj = iplot_outliers,
        fonts = list(sans = "Arial"),
@@ -440,6 +440,10 @@ girafe(ggobj = iplot_outliers,
 )
   
 ```
+
+It turns out that many of the slowest legislative processes concerned – and this is particularly visible recently – the conclusion of international agreements. In these situations, the speed does not depend solely on the EU, as an agreement can only be formally concluded once the legal text is successfully negotiated with a third party.
+
+Most acts on the list of slowest legislative files took well over ten years to complete.
 
 ### Regression {.tabset}
 
