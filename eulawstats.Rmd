@@ -387,7 +387,7 @@ Directives take by far the longest to adopt; unlike decisions and regulations, t
 
 However, before moving onto further investigation of the efficiency hypothesis, we should pause and take a look at some of the discarded outliers. What legislation took the longest to adopt?
 
-```{r outliers}
+```{r outliers, fig.width=10, fig.height=8}
 
 # get titles for top outliers
 outliers_top_txt <- outliers |> 
@@ -426,8 +426,8 @@ iplot_outliers <- outliers_top_txt |>
 
 girafe(ggobj = iplot_outliers,
        fonts = list(sans = "Arial"),
-       width_svg = 9,
-       height_svg = 6,
+       width_svg = 11,
+       height_svg = 8,
        options = list(opts_sizing(rescale = FALSE),
                       opts_toolbar(saveaspng = FALSE),
                       opts_tooltip(css = "background-color:gray;color:white;font-style:italic;padding:10px;border-radius:5px;",
