@@ -402,7 +402,10 @@ outliers_top_txt <- outliers |>
 iplot_outliers <- outliers_top_txt |> 
   bind_rows(data.frame(type = "Recommendation")) |> 
   ggplot(aes(x = as.Date(date), y = days, color = type, fill = type)) +
-  geom_point_interactive(aes(tooltip = title, data_id = celex), show.legend = FALSE) +
+  geom_point_interactive(aes(tooltip = title, data_id = celex), 
+                         alpha = 0.5,
+                         size = 3,
+                         show.legend = FALSE) +
   theme_minimal() +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
