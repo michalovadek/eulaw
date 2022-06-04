@@ -572,6 +572,9 @@ modelsummary(models,
 ```
 
 #### Equation
+
+Plugging in the variables and estimated coefficients, the following regression equation predicts the number of days an act would take to pass given some combination of input values:
+
 ```{r showequation, results = "asis"}
 extract_eq(models[['Controls']], use_coefs = TRUE)
 ```
