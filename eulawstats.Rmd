@@ -24,7 +24,7 @@ text-align: justify}
 
 <style>
 .tocify-extend-page {
-  height: 0 !important;
+  height: 30px !important;
 }
 </style>
 
@@ -456,7 +456,17 @@ Most acts on the list of slowest legislative files took well over ten years to c
 
 Regression analysis unpacks the relationship between a response (dependent) variable and one or more explanatory variables. In our case, we are interested in the relationship (or absence thereof) between the number of days it takes the EU to turn a Commission proposal into law and the number of Member States.
 
-We will assume the relationship between the variables is functionally linear.
+We will assume the relationship between the variables is functionally linear. Canonically, the linear model can be written as:
+
+$$
+Y \sim beta_0 + X\beta_1 + \epsilon
+$$
+
+$$
+\epsilon \sim N(0,\sigma^2)
+$$
+
+where $Y$ is the response variable, $X$ the explanatory variable, $\beta_0$ and $\beta_1$ the unknown parameters of the model and $\epsilon$ the error term which is drawn from normal distribution with mean zero.
 
 #### Table
 
@@ -577,7 +587,7 @@ days_ms
 
 ### {-}
 
-Controlling for the type of act, the linear model predicts that for every additional Member State, the EU takes ```r effect``` days longer to adopt the legal act. This effect is ```r ifelse(reject_null == "can reject", "statistically significant", "not statistically significant")``` at ```r p_thresh``` alpha.
+Controlling for the type of act, the linear model predicts that for every additional Member State, the EU takes on average ```r effect``` days longer to adopt the legal act. This effect is ```r ifelse(reject_null == "can reject", "statistically significant", "not statistically significant")``` at ```r p_thresh``` alpha.
 
 This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality.
 
