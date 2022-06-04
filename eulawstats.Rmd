@@ -438,7 +438,7 @@ girafe(ggobj = iplot_outliers,
        fonts = list(sans = "Arial"),
        width_svg = 11,
        height_svg = 8,
-       options = list(opts_sizing(rescale = FALSE),
+       options = list(opts_sizing(rescale = TRUE),
                       opts_toolbar(saveaspng = FALSE),
                       opts_tooltip(css = "background-color:gray;color:white;font-style:italic;padding:9px;border-radius:5px;font-size:15px;",
                                    use_fill = TRUE),
@@ -459,14 +459,14 @@ Regression analysis unpacks the relationship between a response (dependent) vari
 We will assume the relationship between the variables is functionally linear. Canonically, the linear model can be written as:
 
 $$
-Y \sim beta_0 + X\beta_1 + \epsilon
+Y \sim \beta_0 + X\beta_1 + \epsilon
 $$
 
 $$
 \epsilon \sim N(0,\sigma^2)
 $$
 
-where $Y$ is the response variable, $X$ the explanatory variable, $\beta_0$ and $\beta_1$ the unknown parameters of the model and $\epsilon$ the error term which is drawn from normal distribution with mean zero.
+where $Y$ is the response variable, $X$ the explanatory variable, $\beta_0$ and $\beta_1$ the unknown parameters of the model and $\epsilon$ the error term which comes from a normal distribution with mean zero.
 
 #### Table
 
