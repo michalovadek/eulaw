@@ -48,6 +48,7 @@ library(stringr)
 library(rmarkdown)
 library(modelsummary)
 library(ggiraph)
+library(equatiomatic)
 
 # seed
 set.seed(65234)
@@ -570,13 +571,17 @@ modelsummary(models,
 
 ```
 
+#### Equation
+```{r showequation, results = "asis"}
+extract_eq(models[['Controls']], use_coefs = TRUE)
+```
+
 #### Plot
 ```{r regviz}
 modelplot(models[['Controls']])
 ```
 
 #### Code
-
 ```{r regression, echo=TRUE, eval=FALSE}
 ```
 
