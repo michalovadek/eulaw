@@ -44,6 +44,7 @@ knitr::opts_chunk$set(echo = FALSE,
 library(eurlex)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(stringr)
 library(rmarkdown)
 library(modelsummary)
@@ -643,7 +644,7 @@ Data on legal bases will help us better understand the EU legislative output.
 deleg_prop_time <- lbs_enriched |> 
   distinct(celex, .keep_all = TRUE) |> 
   count(act_year, delegated) |> 
-  tidyr::complete(act_year, delegated, fill = list(n = 0L)) |> 
+  complete(act_year, delegated, fill = list(n = 0L)) |> 
   group_by(act_year) |> 
   mutate(prop = n/sum(n)) |> 
   ungroup()
