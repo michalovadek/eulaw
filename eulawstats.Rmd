@@ -608,9 +608,11 @@ This model is far too simple to establish the existence of a causal relationship
 
 Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are not associated with slower law-making. 
 
-## Legal bases
+## Legal bases {.tabset}
 
 Each legal act of the EU needs to have a _legal basis_ in the EU Treaties or in a pre-existing EU law in case of delegated and implementing acts. This is known as the [principle of conferral](https://en.wikipedia.org/wiki/Principle_of_conferral) and essentially represents the EU equivalent of the concept of [enumerated powers](https://en.wikipedia.org/wiki/Enumerated_powers_(United_States)) in the United States.
+
+Data on legal bases will help us better understand the EU legislative output.
 
 ```{r lbsdata}
 
@@ -636,7 +638,7 @@ lbs_enriched <- lbs |>
          dist_year_lb = act_year - lb_year)
 ```
 
-Data on legal bases will help us better understand the EU legislative output.
+### Plot
 
 ```{r lbsdelegtime}
 
@@ -680,13 +682,26 @@ deleg_prop_time |>
        subtitle = "Proportion of delegated v primary acts in a given year")
 ```
 
+### Dataframe
 
+```{r delegproptimedf}
+deleg_prop_time
+```
 
-Code: Data
+### Code: Data
 
 ```{r lbsdata, eval=FALSE, echo=TRUE}
 ```
 
-directory codes?
+### Code: Plot
 
+```{r lbsdelegtime, eval=FALSE, echo=TRUE}
+```
 
+## {-}
+
+It turns out that historically most legal acts adopted by the EU have been delegated (and implementing) acts, that is acts based on another piece of legislation rather than one of the EU Treaties (primary acts). Last year, such _delegated_ acts represented ```r round(deleg_last_y$prop,2)*100``` per cent of the EU's yearly legislative output.
+
+## Wishlist
+
+In the future this page should include information on: most common legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD).
