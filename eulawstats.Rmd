@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 
-```{r data, include=FALSE}
+```{r initialdata, include=FALSE}
 
 # packages
 library(eurlex)
@@ -100,7 +100,8 @@ We start by looking at how the number of the four main legal acts changed over t
 ```{r ncounttime}
 
 # select only main act types
-relevant_acts <- bind_rows(Regulation = regs, Decison = decs, Directive = dirs, Recommendation = recs,
+relevant_acts <- bind_rows(Regulation = regs, Decison = decs, Directive = dirs,
+                           Recommendation = recs,
                         .id = "type") |> 
   mutate(year = as.integer(str_sub(celex, 2,5))) |> 
   mutate(month_year = as.Date(str_replace(date, "[:digit:][:digit:]$", "01")))
@@ -149,14 +150,18 @@ nyeardif <- ifelse(n_year1 == n_year2, "the same as", nyeardif)
 
 ```
 
-### Code
-
-```{r ncounttime, eval=FALSE, echo=TRUE}
-```
-
 ### Dataframe
 ```{r ncounttimedf}
 n_relevant
+```
+
+### Code: Data
+```{r initialdata, eval=FALSE, echo=TRUE}
+```
+
+### Code: Plot
+
+```{r ncounttime, eval=FALSE, echo=TRUE}
 ```
 
 ## {-}
@@ -186,6 +191,7 @@ proptime_df |>
   ggplot(aes(x = year, y = proportion, fill = type, color = type)) +
   geom_area(show.legend = TRUE) +
   geom_vline(xintercept = c(1960,1980,2000,2020), lty = 2, color = "grey70") +
+  geom_hline(yintercept = 0.50, color = "grey50", lty = 3) +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
   theme_minimal() +
@@ -205,7 +211,7 @@ proptime_df |>
        color = NULL,
        fill = NULL,
        title = "Relative prevalence of legal acts",
-       subtitle = "Proportion of each type of legal act in a given year",)
+       subtitle = "Proportion of each type of legal act in a given year")
 
 ```
 
@@ -600,3 +606,86 @@ Controlling for the type of act, the linear model predicts that for every additi
 This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality.
 
 Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are not associated with slower law-making. 
+
+## Legal bases
+
+Each legal act of the EU needs to have a _legal basis_ in the EU Treaties or in a pre-existing EU law in case of delegated and implementing acts. This is known as the [principle of conferral](https://en.wikipedia.org/wiki/Principle_of_conferral) and essentially represents the EU equivalent of the concept of [enumerated powers](https://en.wikipedia.org/wiki/Enumerated_powers_(United_States)) in the United States.
+
+```{r lbsdata}
+
+# get legal basis data
+lbs <- elx_make_query("any", sector = 3, include_lbs = TRUE) |> 
+  elx_run_query() |> 
+  select(-work, -lbs) |> 
+  filter(!is.na(celex), !is.na(lbcelex))
+
+# select only EU treaties-based acts
+acts_treaty <- lbs |> 
+  filter(str_detect(lbcelex, "^1.*([:digit:]|[:punct:])$")) |> 
+  distinct(celex)
+
+# lbs enriched
+lbs_enriched <- lbs |> 
+  mutate(delegated = ifelse(celex %in% acts_treaty$celex, "primary", "delegated")) |> 
+  mutate(act_year = as.integer(str_sub(celex, 2,5)),
+         act_type = str_sub(celex, 6,6),
+         lb_year = as.integer(str_sub(lbcelex, 2,5)),
+         lb_treaty = str_detect(lbcelex, "^1[:digit:]{4}[:upper:][:digit:]{3,}"),
+         lb_type = paste(str_sub(lbcelex,1,1), str_sub(lbcelex,6,6), sep = "_"),
+         dist_year_lb = act_year - lb_year)
+```
+
+Data on legal bases will help us better understand the EU legislative output.
+
+```{r lbsdelegtime}
+
+# df delegated v primary over time
+deleg_prop_time <- lbs_enriched |> 
+  distinct(celex, .keep_all = TRUE) |> 
+  count(act_year, delegated) |> 
+  tidyr::complete(act_year, delegated, fill = list(n = 0L)) |> 
+  group_by(act_year) |> 
+  mutate(prop = n/sum(n)) |> 
+  ungroup()
+
+# vars for text
+deleg_last_y <- deleg_prop_time |> filter(act_year==year1, delegated == "delegated")
+
+# viz delegated over time
+deleg_prop_time |> 
+  ggplot(aes(x = act_year, y = prop, fill = delegated)) +
+  geom_area(show.legend = TRUE) +
+  geom_vline(xintercept = c(1960,1980,2000,2020), lty = 2, color = "grey70") +
+  geom_hline(yintercept = 0.50, color = "grey50", lty = 3) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "top",
+        legend.justification = "left",
+        legend.title = element_text(face = "italic"),
+        plot.background = element_rect(fill = "white", color = "grey88"),
+        panel.grid = element_blank(),
+        axis.text = element_text(color = "grey10"),
+        title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
+        strip.text = element_text(hjust = 0, face = "bold")) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = NULL,
+       y = NULL,
+       color = NULL,
+       fill = NULL,
+       title = "Relative prevalence of delegated and primary acts",
+       subtitle = "Proportion of delegated v primary acts in a given year")
+```
+
+
+
+Code: Data
+
+```{r lbsdata, eval=FALSE, echo=TRUE}
+```
+
+directory codes?
+
+
