@@ -711,6 +711,4 @@ It turns out that historically most legal acts adopted by the EU have been deleg
 
 In the future this page should include information on: most common legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD).
 
-## Cite
-
-```r cit_page```
+Cite as ```r print(cit_page)```.
