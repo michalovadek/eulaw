@@ -89,7 +89,7 @@ date_now_f <- str_remove(format(date_now, "%d %B %Y"), "^0")
 day_now <- as.integer(str_sub(date_now, 9, 10))
 year_now <- as.integer(str_sub(date_now, 1, 4))
 
-cit_page <- paste("Michal Ovádek, '", rmarkdown::metadata$title, "', available at ", "https://michalovadek.github.io/eulaw/", ", accessed ", date_now_f, ".",
+cit_page <- paste("Michal Ovádek, 'Legislative Output of the European Union', available at https://michalovadek.github.io/eulaw/, accessed on ", date_now_f, ".",
                   sep = "")
 ```
 
