@@ -68,6 +68,13 @@ acts <- acts_proposals |>
   distinct(celex, .keep_all = T) |> 
   select(-proposal)
 
+# in force
+in_force <- elx_make_query("any", sector = 3,
+                           include_force = TRUE) |>
+  elx_run_query() |> 
+  select(-work) |> 
+  distinct(celex, .keep_all = TRUE)
+
 # 4 main types of acts
 regs <- acts |> filter(str_sub(celex,6,6) == "R")
 decs <- acts |> filter(str_sub(celex,6,6) == "D")
@@ -89,7 +96,7 @@ date_now_f <- str_remove(format(date_now, "%d %B %Y"), "^0")
 day_now <- as.integer(str_sub(date_now, 9, 10))
 year_now <- as.integer(str_sub(date_now, 1, 4))
 
-cit_page <- paste("Michal Ovádek, 'Legislative Output of the European Union', available at https://michalovadek.github.io/eulaw/, accessed on ", date_now_f, ".",
+cit_page <- paste("Michal Ovádek, '",rmarkdown::metadata$title,"', available at https://michalovadek.github.io/eulaw/, accessed on ", date_now_f,
                   sep = "")
 ```
 
@@ -415,7 +422,7 @@ outliers_top_txt <- outliers |>
   rowwise() |> 
   mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
                                 "title"),
-         title = str_squish(str_remove(title, "Text with EEA relevance"))) |> 
+         title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
   ungroup()
 
 # interactive plot
@@ -426,6 +433,11 @@ iplot_outliers <- outliers_top_txt |>
                          alpha = 0.5,
                          size = 3,
                          show.legend = FALSE) +
+  annotate(geom = "hline", y = c(3650,3650*2), yintercept = c(3650,3650*2),
+           lty = 2, color = "grey75") +
+  annotate(geom = "text", y = c(3650+110,3650*2+110), x = as.Date("2012-01-01"),
+           label = c("10 years", "20 years"),
+           color = "grey50", fontface = "italic") +
   theme_minimal() +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
@@ -640,8 +652,23 @@ lbs_enriched <- lbs |>
          lb_year = as.integer(str_sub(lbcelex, 2,5)),
          lb_treaty = str_detect(lbcelex, "^1[:digit:]{4}[:upper:][:digit:]{3,}"),
          lb_type = paste(str_sub(lbcelex,1,1), str_sub(lbcelex,6,6), sep = "_"),
-         dist_year_lb = act_year - lb_year)
+         dist_year_lb = act_year - lb_year) |> 
+  filter(!str_detect(lbcelex, "^1.*[:upper:]$"))
+
+# titles of most common lbs
+most_common_lbs <- lbs_enriched |> 
+  distinct(celex, lbcelex, .keep_all = TRUE) |> 
+  count(lbcelex) |> 
+  arrange(-n) |> 
+  slice(1:10) |> 
+  rowwise() |> 
+  mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""),
+                                "title"),
+         title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
+  ungroup()
 ```
+
+The most common legal basis historically is ```r most_common_lbs$title[1]```. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$celex[1],"^3")){"and it is a non-treaty legal basis."}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$celex[1] %in% in_force$celex){It is still in force.} else {It is no longer in force.}`
 
 ### Plot
 
@@ -705,10 +732,15 @@ deleg_prop_time
 
 ## {-}
 
-It turns out that historically most legal acts adopted by the EU have been delegated (and implementing) acts, that is acts based on another piece of legislation rather than one of the EU Treaties (primary acts). Last year, such _delegated_ acts represented ```r round(deleg_last_y$prop,2)*100``` per cent of the EU's yearly legislative output.
+It turns out that most legal acts adopted by the EU have been delegated (and implementing) acts, that is acts based on another piece of legislation rather than one of the EU Treaties (primary acts). Last year, such _delegated_ acts represented ```r round(deleg_last_y$prop,2)*100``` per cent of the EU's yearly legislative output.
 
 ## Wishlist
 
-In the future this page should include information on: most common legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD).
+In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD).
 
-Cite as `r cit_page`.
+More analysis of in force acts.
+
+&nbsp;
+&nbsp;
+
+Cite this document as `r cit_page`.
