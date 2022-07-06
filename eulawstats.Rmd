@@ -668,7 +668,7 @@ most_common_lbs <- lbs_enriched |>
   ungroup()
 ```
 
-The most common legal basis historically is ```r most_common_lbs$title[1]```. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis."}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){It is still in force.} else {It is no longer in force.}`
+The most common legal basis historically is ```r most_common_lbs$title[1]```. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis."}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){It is still in force.} else {"It is no longer in force."}`
 
 ### Plot
 
