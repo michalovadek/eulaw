@@ -70,10 +70,15 @@ acts <- acts_proposals |>
 
 # in force
 in_force <- elx_make_query("any", sector = 3,
-                           include_force = TRUE) |>
+                           include_force = TRUE,
+                           include_date_force = TRUE) |>
   elx_run_query() |> 
   select(-work) |> 
-  distinct(celex, .keep_all = TRUE)
+  rename(date_force = `callret-3`) |> 
+  arrange(celex, date_force) |> 
+  distinct(celex, .keep_all = TRUE) |> 
+  drop_na() |> 
+  filter(between(as.Date(date_force), as.Date("1952-01-01"), as.Date(Sys.Date())))
 
 # 4 main types of acts
 regs <- acts |> filter(str_sub(celex,6,6) == "R")
@@ -320,6 +325,71 @@ last_two_yoy_diff
 ## {-}
 
 So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r this_month_yoy_dir``` the same month last year. `r if(day_now < 16){"But we are still early in the month."}`
+
+### Acts in force {.tabset}
+
+Naturally, not all legal acts remain in force indefinitely, which means that many of the ```r nrow(acts)``` acts ever adopted by the EU are mere relics of the past.
+
+According to Eur-Lex, the EU has ```r nrow(filter(in_force, force == "true"))``` legal acts in force at the moment, though a closer examination shows that many of those acts are practically obsolete, even if technically still valid. For example, act ```31952S0004``` is considered in force, but its sole purpose was to set the period for the collection of coal and steel levies in 1953.
+
+Despite this data caveat, it is still interesting to find out how long ago the acts that are currently applicable have entered into force.
+
+#### Plot
+
+```{r inforce}
+
+# viz
+in_force |> 
+  filter(force == "true") |> 
+  mutate(days_in_force = as.integer(as.Date(Sys.Date()) - as.Date(date_force)),
+         type = str_sub(celex, 6,6)) |> 
+  filter(type %in% c("R","L","H","D")) |> 
+  mutate(type = case_when(type == "D" ~ "Decision",
+                          type == "H" ~ "Recommendation",
+                          type == "L" ~ "Directive",
+                          type == "R" ~ "Regulation",
+                          T ~ NA_character_)) |> 
+  ggplot(aes(x = days_in_force, fill = type, color = type)) +
+  geom_histogram(bins = 100, show.legend = FALSE) +
+  scale_fill_brewer(palette = "Spectral") +
+  scale_color_brewer(palette = "Spectral") +
+  theme_minimal() +
+  theme(legend.position = "top",
+        legend.justification = "left",
+        legend.title = element_text(face = "italic"),
+        plot.background = element_rect(fill = "white", color = "grey88"),
+        panel.grid = element_line(color = "grey95"),
+        axis.text = element_text(color = "grey10"),
+        title = element_text(face = "bold"),
+        plot.subtitle = element_text(face = "italic"),
+        strip.text = element_text(hjust = 0, face = "bold")) +
+  facet_wrap(~type, scales = "free") +
+  labs(x = NULL,
+       y = NULL,
+       color = NULL,
+       fill = NULL,
+       title = "How old are currently applicable legal acts?",
+       subtitle = "Histogram of the number of days since a currently applicable act entered into force")
+
+```
+
+#### Code
+
+```{r inforce, eval=FALSE, echo=TRUE}
+```
+
+#### Dataframe
+```{r inforcedf}
+in_force
+```
+
+### {-}
+
+.. survival ..
+
+We see that the bulk of the currently legally applicable acts have been adopted relatively recently.
+
+At the same time, there is seemingly meaningful variation among the different types of acts. Directives suffer the least from the "recency bias", while regulations and decisions tend to have comparatively short lifespans.
 
 ## Legislative efficiency {.tabset}
 
@@ -668,7 +738,7 @@ most_common_lbs <- lbs_enriched |>
   ungroup()
 ```
 
-The most common legal basis historically is ```r most_common_lbs$title[1]```. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis."}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
+The most common legal basis historically is `r most_common_lbs$title[1]`. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis"}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
 
 ### Plot
 
