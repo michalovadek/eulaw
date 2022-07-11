@@ -5,6 +5,7 @@ author: Dr Michal Ovádek
 output: 
   html_document:
     df_print: paged
+    number_sections: true
     toc: true
     toc_float: true
     theme: cosmo
@@ -109,11 +110,11 @@ The European Union (EU) is often criticized for having a heavy regulatory touch 
 
 As of ```r format(Sys.time(), '%d %B %Y')```, the EU and its predecessors have produced ```r nrow(regs)``` regulations, ```r nrow(dirs)``` directives, ```r nrow(decs)``` decisions and ```r nrow(recs)``` recommendations, according to [Eur-Lex](https://eur-lex.europa.eu/homepage.html) data pulled via the [eurlex](https://github.com/michalovadek/eurlex) package for R^[See https://github.com/michalovadek/eurlex for more details.] and a SPARQL API maintained by the Publications Office of the European Union.^[This also means that any omissions and mistakes present in Eur-Lex are carried through to the output shown here.] (More example use cases, as well as arguments for integrating open data APIs into research workflows, can be found in this [open access paper](https://www.tandfonline.com/doi/full/10.1080/2474736X.2020.1870150).)
 
-## Number of acts over time {.tabset}
+# Number of acts over time {.tabset}
 
 We start by looking at how the number of the four main legal acts changed over the lifespan of the EU. The number of acts adopted yearly is a parsimonious – but imperfect^[We should also take into account the regulatory breadth and depth of each legal act. A decision increasing the tariff on steel by 5 per cent is a very different act from, say, the General Data Protection Regulation. ] – proxy for the EU's regulatory tendencies.
 
-### Plot
+## Plot
 
 ```{r ncounttime}
 
@@ -168,29 +169,29 @@ nyeardif <- ifelse(n_year1 == n_year2, "the same as", nyeardif)
 
 ```
 
-### Dataframe
+## Dataframe
 ```{r ncounttimedf}
 n_relevant
 ```
 
-### Code: Data
+## Code: Data
 ```{r initialdata, eval=FALSE, echo=TRUE}
 ```
 
-### Code: Plot
+## Code: Plot
 
 ```{r ncounttime, eval=FALSE, echo=TRUE}
 ```
 
-## {-}
+# {-}
 
 In ```r year1```, the EU produced ```r n_year1``` legal acts which is ```r nyeardif``` the ```r n_year2``` acts in ```r year2```. Overall, the EU's legislative output is currently considerably lower compared to, in particular, the 1980s and 1990s.
 
-### Proportion of act types {.tabset}
+# Proportion of act types {.tabset}
 
 So we see there is significant over-time variation in the use of the different types of legal acts, but some types of acts, notably regulations, have been historically significantly more common than other types of acts. We can visualize the evolution of proportions directly.
 
-#### Plot
+## Plot
 
 ```{r proptime}
 
@@ -233,17 +234,17 @@ proptime_df |>
 
 ```
 
-#### Code
+## Code
 
 ```{r proptime, eval=FALSE, echo=TRUE}
 ```
 
-#### Dataframe
+## Dataframe
 ```{r proptimedf}
 proptime_df
 ```
 
-### {-}
+# {-}
 
 We can see that although regulations used to dominate the EU's legislative output, decisions – which are typically associated with various administrative actions – are nowadays almost equally prevalent.
 
@@ -253,7 +254,7 @@ The rise in the number of recommendations can be mostly attributed to the streng
 
 The daily streaming of data can be relied on to make completely up-to-date comparisons of EU legislative activity. For example, we can look at the extent to which the monthly adoption rate of legal acts this year differs from last year.
 
-### Plot
+## Plot
 
 ```{r yearonyear}
 
@@ -312,21 +313,21 @@ last_two_yoy_diff |>
 
 ```
 
-### Code
+## Code
 
 ```{r yearonyear, eval=FALSE, echo=TRUE}
 ```
 
-### Dataframe
+## Dataframe
 ```{r yoydf}
 last_two_yoy_diff
 ```
 
-## {-}
+# {-}
 
 So far this month, the EU has adopted ```r this_month_yoy_abs``` legal acts ```r this_month_yoy_dir``` the same month last year. `r if(day_now < 16){"But we are still early in the month."}`
 
-### Acts in force {.tabset}
+# Acts in force {.tabset}
 
 Naturally, not all legal acts remain in force indefinitely, which means that many of the ```r nrow(acts)``` acts ever adopted by the EU are mere relics of the past.
 
@@ -334,7 +335,7 @@ According to Eur-Lex, the EU has ```r nrow(filter(in_force, force == "true"))```
 
 Despite this data caveat, it is still interesting to find out how long ago the acts that are currently applicable have entered into force.
 
-#### Plot
+## Plot
 
 ```{r inforce}
 
@@ -349,8 +350,9 @@ in_force |>
                           type == "L" ~ "Directive",
                           type == "R" ~ "Regulation",
                           T ~ NA_character_)) |> 
+  mutate(months_in_force = days_in_force/12) |> 
   ggplot(aes(x = days_in_force, fill = type, color = type)) +
-  geom_histogram(bins = 100, show.legend = FALSE) +
+  geom_histogram(bins = 200, show.legend = FALSE) +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
   theme_minimal() +
@@ -369,29 +371,27 @@ in_force |>
        color = NULL,
        fill = NULL,
        title = "How old are currently applicable legal acts?",
-       subtitle = "Histogram of the number of days since a currently applicable act entered into force")
+       subtitle = "Histogram of the number of days since currently applicable acts entered into force")
 
 ```
 
-#### Code
+## Code
 
 ```{r inforce, eval=FALSE, echo=TRUE}
 ```
 
-#### Dataframe
+## Dataframe
 ```{r inforcedf}
 in_force
 ```
 
-### {-}
-
-.. survival ..
+# {-}
 
 We see that the bulk of the currently legally applicable acts have been adopted relatively recently.
 
-At the same time, there is seemingly meaningful variation among the different types of acts. Directives suffer the least from the "recency bias", while regulations and decisions tend to have comparatively short lifespans.
+At the same time, there is seemingly meaningful variation among the different types of acts. Directives suffer the least from the "recency bias", while the time horizons of regulations and decisions are considerably shorter.
 
-## Legislative efficiency {.tabset}
+# Legislative efficiency {.tabset}
 
 The image of the EU as an unwieldy bureaucracy with a complicated legislative system appears often in national media. Moreover, most theoretical literature on political systems would expect the number of veto players to affect legislative efficiency. On this basis, we formulate the simple hypothesis that 
 
@@ -399,7 +399,7 @@ The image of the EU as an unwieldy bureaucracy with a complicated legislative sy
 
 Most people are therefore susceptible to assume that the EU needs a lot of time to adopt legal acts. Let's use Eur-Lex data to find out just how long it normally takes to pass legislation.
 
-### Plot
+## Plot
 
 ```{r efficiencyviz}
 
@@ -464,12 +464,12 @@ acts_days |>
 
 ```
 
-### Code
+## Code
 
 ```{r efficiencyviz, echo=TRUE, eval=FALSE}
 ```
 
-### Dataframe
+## Dataframe
 
 ```{r efficiencyvizdf}
 
@@ -477,7 +477,7 @@ acts_days
 
 ```
 
-## {-}
+# {-}
 
 Directives take by far the longest to adopt; unlike decisions and regulations, they are rarely deployed to regulate trivial matters. Nonetheless, there are few easily discernible temporal patterns in the plot. Most of all, it is not obvious that legislative efficiency would decrease as the EU expanded its membership.
 
@@ -547,7 +547,7 @@ It turns out that many of the slowest legislative processes concerned – and th
 
 Most acts on the list of slowest legislative files took well over ten years to complete.
 
-### Regression {.tabset}
+## Regression {.tabset}
 
 Regression analysis unpacks the relationship between a response (dependent) variable and one or more explanatory variables. In our case, we are interested in the relationship (or absence thereof) between the number of days it takes the EU to turn a Commission proposal into law and the number of Member States.
 
@@ -563,7 +563,7 @@ $$
 
 where $Y$ is the response variable, $X$ the explanatory variable, $\beta_0$ and $\beta_1$ the unknown parameters of the model and $\epsilon$ the error term which comes from a normal distribution with mean zero.
 
-#### Table
+### Table
 
 ```{r regression}
 
@@ -665,7 +665,7 @@ modelsummary(models,
 
 ```
 
-#### Equation
+### Equation
 
 Plugging in the variables and estimated coefficients, the following regression equation predicts the number of days an act would take to pass given some combination of input values:
 
@@ -673,21 +673,21 @@ Plugging in the variables and estimated coefficients, the following regression e
 extract_eq(models[['Controls']], use_coefs = TRUE)
 ```
 
-#### Plot
+### Plot
 ```{r regviz}
 modelplot(models[['Controls']])
 ```
 
-#### Code
+### Code
 ```{r regression, echo=TRUE, eval=FALSE}
 ```
 
-#### Dataframe
+### Dataframe
 ```{r regdf}
 days_ms
 ```
 
-### {-}
+## {-}
 
 Controlling for the type of act, the linear model predicts that for every additional Member State, the EU takes on average ```r effect``` days longer to adopt the legal act. This effect is ```r ifelse(reject_null == "can reject", "statistically significant", "not statistically significant")``` at ```r p_thresh``` alpha.
 
@@ -695,7 +695,7 @@ This model is far too simple to establish the existence of a causal relationship
 
 Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are not associated with slower law-making. 
 
-## Legal bases {.tabset}
+# Legal bases {.tabset}
 
 Each legal act of the EU needs to have a _legal basis_ in the EU Treaties or in a pre-existing EU law in case of delegated and implementing acts. This is known as the [principle of conferral](https://en.wikipedia.org/wiki/Principle_of_conferral) and essentially represents the EU equivalent of the concept of [enumerated powers](https://en.wikipedia.org/wiki/Enumerated_powers_(United_States)) in the United States.
 
@@ -740,7 +740,7 @@ most_common_lbs <- lbs_enriched |>
 
 The most common legal basis historically is `r most_common_lbs$title[1]`. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis"}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
 
-### Plot
+## Plot
 
 ```{r lbsdelegtime}
 
@@ -784,31 +784,29 @@ deleg_prop_time |>
        subtitle = "Proportion of delegated v primary acts in a given year")
 ```
 
-### Dataframe
+## Dataframe
 
 ```{r delegproptimedf}
 deleg_prop_time
 ```
 
-### Code: Data
+## Code: Data
 
 ```{r lbsdata, eval=FALSE, echo=TRUE}
 ```
 
-### Code: Plot
+## Code: Plot
 
 ```{r lbsdelegtime, eval=FALSE, echo=TRUE}
 ```
 
-## {-}
+# {-}
 
 It turns out that most legal acts adopted by the EU have been delegated (and implementing) acts, that is acts based on another piece of legislation rather than one of the EU Treaties (primary acts). Last year, such _delegated_ acts represented ```r round(deleg_last_y$prop,2)*100``` per cent of the EU's yearly legislative output.
 
-## Wishlist
+# Todolist
 
-In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD).
-
-More analysis of in force acts.
+In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD), and more.
 
 &nbsp;
 &nbsp;
