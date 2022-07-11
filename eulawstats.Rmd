@@ -250,7 +250,7 @@ We can see that although regulations used to dominate the EU's legislative outpu
 
 The rise in the number of recommendations can be mostly attributed to the strengthening of the EU's role in the surveillance and coordination of the Member States' economic policies.
 
-## Year-on-year comparison {.tabset}
+# Year-on-year comparison {.tabset}
 
 The daily streaming of data can be relied on to make completely up-to-date comparisons of EU legislative activity. For example, we can look at the extent to which the monthly adoption rate of legal acts this year differs from last year.
 
@@ -808,7 +808,6 @@ It turns out that most legal acts adopted by the EU have been delegated (and imp
 
 In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD), and more.
 
-&nbsp;
-&nbsp;
+# Cite
 
 Cite this document as `r cit_page`.
