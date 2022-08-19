@@ -491,9 +491,9 @@ outliers_top_txt <- outliers |>
   slice(1:75) |> 
   rowwise() |> 
   mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
-                                "title"),
-         title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
-  ungroup()
+                                "title")) |> 
+  ungroup() |> 
+  mutate(title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?")))
 
 # interactive plot
 iplot_outliers <- outliers_top_txt |> 
