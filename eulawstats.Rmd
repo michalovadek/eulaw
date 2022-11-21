@@ -45,6 +45,7 @@ knitr::opts_chunk$set(echo = FALSE,
 library(eurlex)
 library(ggplot2)
 library(dplyr)
+library(purrr)
 library(tidyr)
 library(stringr)
 library(rmarkdown)
