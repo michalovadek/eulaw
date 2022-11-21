@@ -489,10 +489,11 @@ However, before moving onto further investigation of the efficiency hypothesis, 
 outliers_top_txt <- outliers |> 
   arrange(-days) |> 
   slice(1:75) |> 
-  rowwise() |> 
-  mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
-                                "title")) |> 
-  ungroup() |> 
+  #rowwise() |> 
+  #mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""),
+  #                              "title")) |> 
+  #ungroup() |> 
+  mutate(title = map_chr(paste("http://publications.europa.eu/resource/celex/", celex, sep = ""), possibly(eurlex::elx_fetch_data, otherwise = NA_character_), "title")) |>
   mutate(title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?")))
 
 # interactive plot
@@ -731,11 +732,13 @@ most_common_lbs <- lbs_enriched |>
   count(lbcelex) |> 
   arrange(-n) |> 
   slice(1:10) |> 
-  rowwise() |> 
-  mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""),
-                                "title"),
-         title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
-  ungroup()
+  mutate(title = map_chr(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""), possibly(eurlex::elx_fetch_data, otherwise = NA_character_), "title"),
+         title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?")))
+  #rowwise() |> 
+  #mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""),
+  #                              "title"),
+  #       title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
+  #ungroup()
 ```
 
 The most common legal basis historically is `r most_common_lbs$title[1]`. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis"}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
