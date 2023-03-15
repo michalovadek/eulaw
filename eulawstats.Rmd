@@ -850,7 +850,7 @@ country_votes_prop <- country_votes_n |>
 
 ```
 
-Excluding votes where all governments voted in favour, we are left with between ```r max(country_votes_prop$n_votes, na.rm = T)``` and ```min(country_votes_prop$n_votes, na.rm = T)``` per Member State. While these numbers do not represent the entire historical voting record, they should still help us lift the veil on variation in Member States' propensity to disagree. Note that due to opt-outs not all countries have participated in every vote.
+Excluding votes where all governments voted in favour, we are left with between ```r max(country_votes_prop$n_votes, na.rm = T)``` and ```r min(country_votes_prop$n_votes, na.rm = T)``` per Member State. While these numbers do not represent the entire historical voting record, they should still help us lift the veil on variation in Member States' propensity to disagree. Note that due to opt-outs not all countries have participated in every vote.
 
 ## Plot
 
@@ -865,16 +865,17 @@ iplot_votes_prop <- country_votes_prop |>
                          show.legend = FALSE) +
   geom_segment_interactive(aes(tooltip = tooltip, data_id = country),
                            show.legend = FALSE) +
-  theme_minimal() +
+  theme_minimal(base_family = "Arial") +
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
         plot.background = element_rect(fill = "white", color = "grey88"),
-        panel.grid = element_blank(),
-        axis.text = element_text(color = "grey10"),
-        title = element_text(face = "bold"),
-        plot.caption = element_text(face = "italic", size = 8),
-        plot.subtitle = element_text(face = "italic"),
+        axis.text = element_text(color = "grey10", size = 12),
+        title = element_text(face = "bold", size = 16),
+        panel.grid = element_line(color = "grey94"),
+        axis.title = element_text(hjust = 1, size = 14),
+        plot.subtitle = element_text(face = "italic", size = 15),
+        plot.caption = element_text(face = "italic", size = 9),
         strip.text = element_text(hjust = 0, face = "bold")) +
   scale_x_continuous(expand = c(0.01,0)) +
   scale_color_gradient(low = "red", high = "navyblue") +
