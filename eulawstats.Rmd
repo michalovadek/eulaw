@@ -894,7 +894,7 @@ iplot_votes_prop <- country_votes_prop |>
         panel.grid = element_line(color = "grey94"),
         axis.title = element_text(hjust = 1, size = 14),
         plot.subtitle = element_text(face = "italic", size = 15),
-        plot.caption = element_text(face = "italic", size = 8.2),
+        plot.caption = element_text(face = "italic", size = 8),
         strip.text = element_text(hjust = 0, face = "bold")) +
   scale_x_continuous(expand = c(0.01,0)) +
   scale_color_gradient(low = "red", high = "navyblue") +
@@ -908,7 +908,7 @@ iplot_votes_prop <- country_votes_prop |>
 
 girafe(ggobj = iplot_votes_prop,
        fonts = list(sans = "Arial"),
-       width_svg = 11,
+       width_svg = 12,
        height_svg = 8,
        options = list(opts_sizing(rescale = TRUE),
                       opts_toolbar(saveaspng = FALSE),
