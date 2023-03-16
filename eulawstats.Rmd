@@ -52,6 +52,7 @@ library(rmarkdown)
 library(modelsummary)
 library(ggiraph)
 library(equatiomatic)
+library(DT)
 
 # seed
 set.seed(65234)
@@ -693,7 +694,7 @@ days_ms
 
 Controlling for the type of act, the linear model predicts that for every additional Member State, the EU takes on average ```r effect``` days longer to adopt the legal act. This effect is ```r ifelse(reject_null == "can reject", "statistically significant", "not statistically significant")``` at ```r p_thresh``` alpha.
 
-This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality.
+This model is far too simple to establish the existence of a causal relationship between the number of Member States and legislative efficiency. Indeed, some scholars would argue that no amount of conditioning on observables is sufficient to establish causality. Moreover, Poisson regression would be more appropriate here as our dependent variable is discrete and bounded at zero.
 
 Nonetheless, our simple analysis suggests that we ```r reject_null``` the null hypothesis that more Member States in the EU system are not associated with slower law-making. 
 
@@ -719,6 +720,8 @@ acts_treaty <- lbs |>
 # lbs enriched
 lbs_enriched <- lbs |> 
   mutate(delegated = ifelse(celex %in% acts_treaty$celex, "primary", "delegated")) |> 
+  mutate(lbcelex = str_replace(lbcelex, "^1201[:digit:](?=[E|M])", "12008"),
+         lbcelex = str_replace(lbcelex, "^12006(?=[E|M])", "12002")) |> 
   mutate(act_year = as.integer(str_sub(celex, 2,5)),
          act_type = str_sub(celex, 6,6),
          lb_year = as.integer(str_sub(lbcelex, 2,5)),
@@ -727,22 +730,38 @@ lbs_enriched <- lbs |>
          dist_year_lb = act_year - lb_year) |> 
   filter(!str_detect(lbcelex, "^1.*[:upper:]$"))
 
-# titles of most common lbs
+# most common lbs
 most_common_lbs <- lbs_enriched |> 
   distinct(celex, lbcelex, .keep_all = TRUE) |> 
   count(lbcelex) |> 
-  arrange(-n) |> 
+  arrange(-n)
+
+# titles of most common lbs
+most_common_lbs10 <- most_common_lbs |> 
   slice(1:10) |> 
   mutate(title = map_chr(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""), possibly(eurlex::elx_fetch_data, otherwise = NA_character_), "title"),
          title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?")))
-  #rowwise() |> 
-  #mutate(title = elx_fetch_data(paste("http://publications.europa.eu/resource/celex/", lbcelex, sep = ""),
-  #                              "title"),
-  #       title = str_squish(str_remove(title, "\\(?Text with EEA relevance\\)?"))) |> 
-  #ungroup()
+
+# most common lisbon lbs
+lisbon_lbs_n <- most_common_lbs |> 
+  filter(str_detect(lbcelex, "^12008[E|M][:digit:]")) |> 
+  mutate(art_num = as.integer(str_extract(lbcelex, "(?<=E|M)[:digit:]+")),
+         art_treaty = ifelse(str_detect(lbcelex, "8E"), "TFEU", "TEU"),
+         lb_name = str_c("Article ", art_num, " ", art_treaty)) |> 
+  rename(lb_celex = lbcelex,
+         n_invoked = n) |> 
+  relocate(lb_name, n_invoked, .before = 1)
 ```
 
-The most common legal basis historically is `r most_common_lbs$title[1]`. It has been used as a legal basis on ```r most_common_lbs$n[1]``` occasions `r if(str_detect(most_common_lbs$lbcelex[1],"^3")){"and it is a non-treaty legal basis"}`. `r if(str_detect(most_common_lbs$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
+The most common legal basis historically is `r most_common_lbs10$title[1]`. It has been used as a legal basis on ```r most_common_lbs10$n[1]``` occasions `r if(str_detect(most_common_lbs10$lbcelex[1],"^3")){"and it is a non-treaty legal basis"}`. `r if(str_detect(most_common_lbs10$title[1],"Merger")){"The prevalence of this particular piece of legislation underscores the EU's regulatory role in trying to ensure a competitive playing field in the single market."}` `r if(most_common_lbs10$lbcelex[1] %in% in_force$celex){"It is still in force."} else {"It is no longer in force."}`
+
+Nonetheless, when we think of legal bases, we usually imagine a Treaty competence. Looking exclusively at legal bases in the Treaty on the Functioning of the European Union (TFEU) and Treaty on European Union (TEU), the following table let's you browse the most invoked competences since the entry into force of the Treaty of Lisbon.
+
+```{r}
+datatable(lisbon_lbs_n)
+```
+
+The focus on Treaty competences should not, however, obscure the fact that many EU acts are based on existing legislation rather than directly on a Treaty legal basis.
 
 ## Plot
 
@@ -791,7 +810,7 @@ deleg_prop_time |>
 ## Dataframe
 
 ```{r delegproptimedf}
-deleg_prop_time
+datatable(deleg_prop_time)
 ```
 
 ## Code: Data
@@ -850,7 +869,7 @@ country_votes_prop <- country_votes_n |>
 
 ```
 
-Excluding votes where all governments voted in favour, we are left with between ```r max(country_votes_prop$n_votes, na.rm = T)``` and ```r min(country_votes_prop$n_votes, na.rm = T)``` per Member State. While these numbers do not represent the entire historical voting record, they should still help us lift the veil on variation in Member States' propensity to disagree. Note that due to opt-outs not all countries have participated in every vote.
+Excluding votes where all governments voted in favour, we are left with between ```r max(country_votes_prop$n_votes, na.rm = T)``` and ```r min(country_votes_prop$n_votes, na.rm = T)``` votes per Member State. While these numbers do not represent the entire historical voting record, they should still help us lift the veil on variation in Member States' propensity to disagree. Note that due to opt-outs not all countries have participated in every vote.
 
 ## Plot
 
@@ -875,7 +894,7 @@ iplot_votes_prop <- country_votes_prop |>
         panel.grid = element_line(color = "grey94"),
         axis.title = element_text(hjust = 1, size = 14),
         plot.subtitle = element_text(face = "italic", size = 15),
-        plot.caption = element_text(face = "italic", size = 9),
+        plot.caption = element_text(face = "italic", size = 8.2),
         strip.text = element_text(hjust = 0, face = "bold")) +
   scale_x_continuous(expand = c(0.01,0)) +
   scale_color_gradient(low = "red", high = "navyblue") +
@@ -921,11 +940,11 @@ country_votes_prop
 
 The country comparison reveals substantial variation in the frequency of disagreement. The only Member State to ever exit the EU, the United Kingdom, has been particularly active when it comes to abstaining or voting against legislation. On the other end of the scale is France, which has been happy to support almost every law or Council position put in front of it. We are unable to tell from this simple comparison whether a supportive voting record reflects satisfaction with the negotiated substance or governments' overall stance on European integration (or both).
 
-A more sophisticated way of scaling Member States' preferences would involve deriving their ideal points from the votes through an item-response model. In our example, we assume that all votes are equally informative and important; ideally, we would want to relax this assumption.
+A more sophisticated way of scaling Member States' preferences would involve deriving their ideal points from the votes through an item-response model.^[An example application of an ideal point IRT model can be found in [this paper](https://journals.sagepub.com/doi/full/10.1177/1465116520967414).] In our example, we assume that all votes are equally informative and important; ideally, we would want to relax this assumption.
 
 # Todolist
 
-In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change (RDD/DiD), and more.
+In the future this page should include information on: most common Treaty legal bases (after applying equivalence table), relatedly distribution of directory codes, legal basis Treaty chapters, analysis of effect of voting rule change, and more.
 
 # Cite
 
