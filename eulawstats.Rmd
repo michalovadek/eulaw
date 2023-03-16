@@ -173,7 +173,7 @@ nyeardif <- ifelse(n_year1 == n_year2, "the same as", nyeardif)
 
 ## Dataframe
 ```{r ncounttimedf}
-n_relevant
+datatable(n_relevant)
 ```
 
 ## Code: Data
@@ -243,7 +243,7 @@ proptime_df |>
 
 ## Dataframe
 ```{r proptimedf}
-proptime_df
+datatable(proptime_df)
 ```
 
 # {-}
@@ -322,7 +322,7 @@ last_two_yoy_diff |>
 
 ## Dataframe
 ```{r yoydf}
-last_two_yoy_diff
+datatable(last_two_yoy_diff)
 ```
 
 # {-}
@@ -384,7 +384,7 @@ in_force |>
 
 ## Dataframe
 ```{r inforcedf}
-in_force
+datatable(in_force)
 ```
 
 # {-}
@@ -474,9 +474,7 @@ acts_days |>
 ## Dataframe
 
 ```{r efficiencyvizdf}
-
-acts_days
-
+datatable(acts_days)
 ```
 
 # {-}
@@ -687,7 +685,7 @@ modelplot(models[['Controls']])
 
 ### Dataframe
 ```{r regdf}
-days_ms
+datatable(days_ms)
 ```
 
 ## {-}
@@ -923,7 +921,7 @@ girafe(ggobj = iplot_votes_prop,
 ## Dataframe
 
 ```{r votingpropdf}
-country_votes_prop
+datatable(country_votes_prop)
 ```
 
 ## Code: Data
