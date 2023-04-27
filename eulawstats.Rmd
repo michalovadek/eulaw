@@ -59,11 +59,10 @@ set.seed(65234)
 
 # acts
 acts_proposals <- elx_make_query("any", sector = 3,
-                           include_date = TRUE,
-                           include_proposal = TRUE) |>
+                                 include_date = TRUE,
+                                 include_proposal = TRUE) |>
   elx_run_query() |> 
-  select(-work) |> 
-  rename(date = `callret-3`)
+  select(-work)
 
 # acts only
 acts <- acts_proposals |> 
@@ -77,7 +76,7 @@ in_force <- elx_make_query("any", sector = 3,
                            include_date_force = TRUE) |>
   elx_run_query() |> 
   select(-work) |> 
-  rename(date_force = `callret-3`) |> 
+  rename(date_force = dateforce) |> 
   arrange(celex, date_force) |> 
   distinct(celex, .keep_all = TRUE) |> 
   drop_na() |> 
@@ -93,7 +92,7 @@ recs <- acts |> filter(str_sub(celex,6,6) == "H")
 proposals <- elx_make_query("proposal", include_date = TRUE) |> 
   elx_run_query() |> 
   select(-work,-type) |> 
-  rename(date_proposal = `callret-3`) |> 
+  rename(date_proposal = date) |> 
   filter(!is.na(celex),
          !is.na(date_proposal)) |> 
   distinct(celex, .keep_all = TRUE)
