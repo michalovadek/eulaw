@@ -107,12 +107,13 @@ proposals <- elx_make_query("proposal", include_date = TRUE) |>
 
 # latest act titles and EuroVoc
 recent_titles <- acts |> 
-  arrange(desc(date)) |> 
+  arrange(desc(date), desc(celex)) |> 
   filter(str_sub(celex,6,6) %in% c("D","R","L","H")) |> 
   slice(1:50) |> 
   mutate(title = map_chr(str_c("http://publications.europa.eu/resource/celex/",
                                celex), 
-                         possibly(eurlex::elx_fetch_data, otherwise = NA_character_), "title"))
+                         possibly(eurlex::elx_fetch_data, otherwise = NA_character_), "title")) |> 
+  mutate(date = as.Date(date))
 
 # citation
 cit_page <- paste("Michal Ovádek, '",rmarkdown::metadata$title,"', available at https://michalovadek.github.io/eulaw/, accessed on ", date_now_f,
@@ -127,8 +128,11 @@ The following table shows the most recent legislation published by the EU:
 
 ```{r mostrecenttable}
 recent_titles |> 
-  mutate(date = as.Date(date)) |> 
-  datatable()
+  datatable(rownames = FALSE,
+            options = list(pageLength = 5,
+                           autoWidth = TRUE,
+                           columnDefs = list(list(targets = 1, width = '60px')))) |> 
+  formatStyle('celex',  fontWeight = 'bold')
 ```
 
 # Number of acts over time {.tabset}
@@ -547,6 +551,7 @@ iplot_outliers <- outliers_top_txt |>
        x = "Date of adoption",
        y = "Days to adoption")
 
+# render
 girafe(ggobj = iplot_outliers,
        fonts = list(sans = "Arial"),
        width_svg = 11,
@@ -772,7 +777,7 @@ The most common legal basis historically is `r most_common_lbs10$title[1]`. It h
 
 Nonetheless, when we think of legal bases, we usually imagine a Treaty competence. Looking exclusively at legal bases in the Treaty on the Functioning of the European Union (TFEU) and Treaty on European Union (TEU), the following table let's you browse the most invoked competences since the entry into force of the Treaty of Lisbon.
 
-```{r}
+```{r lisbonlbsntable}
 datatable(lisbon_lbs_n)
 ```
 
@@ -955,11 +960,11 @@ datatable(country_votes_prop)
 
 The country comparison reveals substantial variation in the frequency of disagreement. The only Member State to ever exit the EU, the United Kingdom, has been particularly active when it comes to abstaining or voting against legislation. On the other end of the scale is France, which has been happy to support almost every law or Council position put in front of it. We are unable to tell from this simple comparison whether a supportive voting record reflects satisfaction with the negotiated substance or governments' overall stance on European integration (or both).
 
-A more sophisticated way of scaling Member States' preferences would involve deriving their ideal points from the votes through an item-response model.^[An example application of an ideal point IRT model can be found in [this paper](https://journals.sagepub.com/doi/full/10.1177/1465116520967414).] In our example, we assume that all votes are equally informative and important; ideally, we would want to relax this assumption.
+A more sophisticated way of scaling Member States' preferences would involve deriving their ideal points from the votes through an item-response model.^[An example application of an ideal point IRT model can be found in [this paper](https://journals.sagepub.com/doi/full/10.1177/1465116520967414).] In our example, we assume that all votes with a disagreement are equally informative and important; ideally, we would want to relax this assumption.
 
-# Todolist
+<!-- # Todolist -->
 
-In the future this page should include information on: distribution of directory codes (/EuroVoc terms), legal basis Treaty chapters, analysis of effect of voting rule change, and more.
+<!-- In the future this page should include information on: distribution of directory codes (/EuroVoc terms), legal basis Treaty chapters, analysis of effect of voting rule change, and more. -->
 
 # Cite
 
