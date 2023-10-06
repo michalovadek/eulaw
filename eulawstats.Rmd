@@ -131,7 +131,7 @@ recent_titles |>
   datatable(rownames = FALSE,
             options = list(pageLength = 5,
                            autoWidth = TRUE,
-                           columnDefs = list(list(targets = 1, width = '60px')))) |> 
+                           columnDefs = list(list(targets = 1, width = '85px')))) |> 
   formatStyle('celex',  fontWeight = 'bold')
 ```
 
