@@ -37,6 +37,9 @@ jobs:
           source("libcurl-install.R")
         shell: Rscript {0}
 
+      - name: Install system dependencies
+        run: sudo apt-get install -y libpng-dev
+      
       - uses: r-lib/actions/setup-renv@v2
       
       - name: Render Rmd file
