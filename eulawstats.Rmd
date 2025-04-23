@@ -297,8 +297,7 @@ last_two_yoy_diff <- last_two_years_full |>
   arrange(month_year) |> 
   mutate(month = str_sub(month_year, 6,7)) |> 
   group_by(month, type) |> 
-  summarise(yoy_diff = diff(n)) |> 
-  ungroup()
+  reframe(yoy_diff = diff(n))
 
 # this month for text
 this_month_yoy <- last_two_yoy_diff |> 
@@ -405,7 +404,7 @@ in_force |>
 
 ## Dataframe
 ```{r inforcedf}
-datatable(in_force)
+datatable(slice(in_force, 1:1000))
 ```
 
 # {-}
@@ -484,7 +483,6 @@ acts_days |>
        title = "Number of days between proposal and adoption",
        subtitle = "By five-year window in which the act was adopted*",
        caption = "* Outliers are pruned from the analysis, dashed line shows the global mean")
-
 ```
 
 ## Code
@@ -495,7 +493,7 @@ acts_days |>
 ## Dataframe
 
 ```{r efficiencyvizdf}
-datatable(acts_days)
+datatable(slice(acts_days, 1:1000))
 ```
 
 # {-}
@@ -525,15 +523,16 @@ iplot_outliers <- outliers_top_txt |>
                          alpha = 0.5,
                          size = 3,
                          show.legend = FALSE) +
-  annotate(geom = "hline", y = c(3650,3650*2), yintercept = c(3650,3650*2),
-           lty = 2, color = "grey75") +
+  geom_hline(yintercept = c(3650,3650*2), lty = 2, color = "grey75") +
+  #annotate(geom = "hline", y = c(3650,3650*2), yintercept = c(3650,3650*2),
+  #         lty = 2, color = "grey75") +
   annotate(geom = "text", y = c(3650+110,3650*2+110), x = as.Date("2012-01-01"),
            label = c("10 years", "20 years"),
            color = "grey50", fontface = "italic") +
   theme_minimal() +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
-  theme_minimal(base_family = "Arial") +
+  theme_minimal(base_family = "sans") +
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
@@ -553,7 +552,7 @@ iplot_outliers <- outliers_top_txt |>
 
 # render
 girafe(ggobj = iplot_outliers,
-       fonts = list(sans = "Arial"),
+       #fonts = list(sans = "Arial"),
        width_svg = 11,
        height_svg = 8,
        options = list(opts_sizing(rescale = TRUE),
@@ -707,7 +706,7 @@ modelplot(models[['Controls']])
 
 ### Dataframe
 ```{r regdf}
-datatable(days_ms)
+datatable(slice(days_ms, 1:1000))
 ```
 
 ## {-}
