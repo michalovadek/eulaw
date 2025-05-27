@@ -60,8 +60,8 @@ library(gfonts)
 set.seed(35239)
 
 # fonts
-register_gfont("Open Sans")
-addGFontHtmlDependency(family = "Open Sans")
+gdtools::register_liberationsans()
+#addGFontHtmlDependency(family = "Open Sans")
 
 # current date
 date_now <- Sys.Date()
@@ -538,7 +538,7 @@ iplot_outliers <- outliers_top_txt |>
   theme_minimal() +
   scale_fill_brewer(palette = "Spectral") +
   scale_color_brewer(palette = "Spectral") +
-  theme_minimal(base_family = "sans") +
+  theme_minimal(base_family = "Liberation Sans") +
   theme(legend.position = "top",
         legend.justification = "left",
         legend.title = element_text(face = "italic"),
@@ -558,7 +558,8 @@ iplot_outliers <- outliers_top_txt |>
 
 # render
 girafe(ggobj = iplot_outliers,
-       fonts = list(sans = "Open Sans"),
+       dependencies = gdtools::liberationsansHtmlDependency(),
+       #fonts = list(sans = "Open Sans"),
        width_svg = 11,
        height_svg = 8,
        options = list(opts_sizing(rescale = TRUE),
