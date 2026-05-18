@@ -269,7 +269,7 @@
     },
     "base64enc": {
       "Package": "base64enc",
-      "Version": "0.1-3",
+      "Version": "0.1-6",
       "Source": "Repository",
       "Title": "Tools for base64 encoding",
       "Author": "Simon Urbanek <Simon.Urbanek@r-project.org>",
